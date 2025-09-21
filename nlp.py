@@ -24,21 +24,36 @@ for i in NewList:
     A = WordNetLemmatizer().lemmatize(i)
 
 def Statements(Data_Frame):
-    Column_One = Data_Frame["Statement"]
+    Column_One = Data_Frame
     EmptyList = []
     WordList = []
-    for i in Data_Frame["Statement"]:
+    for i in Data_Frame:
         New_Sentence = re.sub("[^a-zA-Z]"," ",i).lower()
-        for i in New_Sentence.split():
-            if i not in stopwords.words("english"):
-                K = WordNetLemmatizer().lemmatize(i)
+        for j in New_Sentence.split():
+            if j not in stopwords.words("english"):
+                K = WordNetLemmatizer().lemmatize(j)
                 WordList.append(K)
-                Joined = " ".join(WordList)
-    print(Joined)
+        L = " ".join(WordList) 
+        EmptyList.append(L)  
+    return EmptyList
 
-Statements(Data_Frame)
+AllStatements = Statements(Data_Frame["Statement"])
 
+from sklearn.feature_extraction.text import CountVectorizer as CV
 
+objct = CV(ngram_range=(1,2))
 
+x = objct.fit_transform(AllStatements)
+y = Data_Frame["Emotion"]
 
-    
+from sklearn.ensemble import RandomForestClassifier 
+
+RFC = RandomForestClassifier(n_estimators=100)
+
+RFC.fit(x,y)
+
+Sample_Sentence = Statements(["I am sad."])
+objct2 = CV.transform(Sample_Sentence)
+
+objct3 = RFC.predict(objct2)
+print(objct3)
